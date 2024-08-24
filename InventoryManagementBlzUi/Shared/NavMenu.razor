@@ -1,0 +1,60 @@
+@inject Microsoft.AspNetCore.Components.NavigationManager navigationManager;
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light" style="height:45px !important;">
+    <div class="container container-contents-display">       
+       <div>     
+            @foreach (var item in dModels)
+            {
+                <a class="btn btn-navbar-grey px-4 p-1" href="@item.PageAddress">
+                    <span class="fa fa-th-list" style="margin-right:4px; font-size:13px;" ></span> @item.ModelName
+                </a>
+            }
+            </div>           
+
+    </div>
+</nav>
+
+@code 
+{
+    private bool collapseNavMenu = true;
+    private bool AriaExpanded = false;
+    private string NavMenuCssClass => collapseNavMenu ? "collapse navbar-collapse" : "navbar-collapse collapse show";
+    private string PopupMenuCssClass => AriaExpanded ? "show" : "";
+
+    //TODO -replac this list from db list of data models
+    List<ModelTab> dModels;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+        AriaExpanded = !AriaExpanded;
+    }
+
+    private void ToggleNavMenuClose()
+    {
+        collapseNavMenu = true;
+        AriaExpanded = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        dModels = new List<ModelTab>()
+        {
+
+			new ModelTab {ModelName = "Product", PageAddress="/Product"},
+
+
+        };
+
+    }
+  
+    //TODO -replac this list from db list od data models
+    public class ModelTab
+    {
+        public System.String ModelName { get; set; }
+        public System.String PageAddress { get; set; }
+    }
+}
+
+
+

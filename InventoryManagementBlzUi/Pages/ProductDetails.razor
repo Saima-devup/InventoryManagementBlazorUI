@@ -1,0 +1,143 @@
+@page "/Productdetails/{Id}"
+@using InventoryManagementBlzUi.Models;
+@using InventoryManagementBlzUi.APIClient
+@inject Microsoft.AspNetCore.Components.NavigationManager navigationManager;
+@inject ProductAPIClient _ApiClient;
+
+<div class="container">
+    @if(Id != "0")
+    {
+        <h4>Edit Product</h4>
+        <hr />
+    }
+    else
+    {
+       <h4>Create Product</h4>
+       <hr /> 
+    }
+    
+    <div id="accordion">
+        @*<div class="card">*@
+          @* <div class="card-header">
+                <a class="card-link" >
+                    Manage Details
+                </a>
+            </div>*@
+            @*<div id="collapseOne" class="collapse show" data-parent="#accordion">*@
+               @* <div class="card-body">*@
+                    <EditForm Model="@dataItem" OnValidSubmit="@CreateUpdateItem">
+                        <DataAnnotationsValidator />
+                        <div class="row">
+                            					<div class="col-md-6 mt-2">
+						<div class="form-group">
+							<label for="Name" class="control-label mb-1">Name:</label>
+							<input for="Name" class="form-control" @bind-value="@dataItem.Name" />
+							<ValidationMessage For="(()=>dataItem.Name)" />
+						</div>
+					</div>
+					<div class="col-md-6 mt-2">
+						<div class="form-group">
+							<label for="Name" class="control-label mb-1">Category Id:</label>
+							<input for="Name" class="form-control" @bind-value="@dataItem.CategoryId" />
+							<ValidationMessage For="(()=>dataItem.CategoryId)" />
+						</div>
+					</div>
+					<div class="col-md-6 mt-2">
+						<div class="form-group">
+							<label for="Name" class="control-label mb-1">Net Price:</label>
+							<input for="Name" class="form-control" @bind-value="@dataItem.NetPrice" />
+							<ValidationMessage For="(()=>dataItem.NetPrice)" />
+						</div>
+					</div>
+					<div class="col-md-6 mt-2">
+						<div class="form-group">
+							<label for="Name" class="control-label mb-1">Sales Price:</label>
+							<input for="Name" class="form-control" @bind-value="@dataItem.SalesPrice" />
+							<ValidationMessage For="(()=>dataItem.SalesPrice)" />
+						</div>
+					</div>
+					<div class="col-md-6 mt-2">
+						<div class="form-group">
+							<label for="Name" class="control-label mb-1">Stock Quantity:</label>
+							<input for="Name" class="form-control" @bind-value="@dataItem.StockQuantity" />
+							<ValidationMessage For="(()=>dataItem.StockQuantity)" />
+						</div>
+					</div>
+					<div class="col-md-6 mt-2">
+						<div class="form-group">
+							<label for="Name" class="control-label mb-1">Production Date:</label>
+							<InputDate class="form-control" @bind-Value="@dataItem.ProductionDate" />
+							<ValidationMessage For="(()=>dataItem.ProductionDate)" />
+						</div>
+					</div>
+					<div class="col-md-6 mt-2">
+						<div class="form-group">
+							<label for="Name" class="control-label mb-1">Status:</label>
+							<input for="Name" class="form-control" @bind-value="@dataItem.Status" />
+							<ValidationMessage For="(()=>dataItem.Status)" />
+						</div>
+					</div>
+
+
+                            <div class="col-md-12 mt-3 mb-3">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary-orange btn-sm"><i class="oi oi-circle-check" ></i>Save</button>
+                                    <button class="btn btn-primary-grey btn-sm" @onclick="() => cancel()"><i class="oi oi-circle-x" ></i>Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </EditForm>
+               @* </div>
+            </div>
+        </div>*@
+    </div>
+</div>
+
+@code 
+{
+    [Parameter]
+    public string Id { get; set; }
+    ProductModel dataItem{ get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            dataItem = new ProductModel();
+            if (Id != "0")
+                dataItem = await _ApiClient.GetById(Convert.ToInt64(Id));
+            else
+                dataItem = new ProductModel();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine(ex.ToString());
+        }
+
+    }
+    protected async Task CreateUpdateItem()
+    {
+        try
+        {
+            var response = await _ApiClient.CreateUpdate(dataItem);
+            if (response == true)
+            {
+                navigationManager.NavigateTo("/Product");
+            }
+            await InvokeAsync(() => StateHasChanged());
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine(ex.ToString());
+        }
+    }
+
+    void cancel()
+    {
+        navigationManager.NavigateTo("/Product");
+        StateHasChanged();
+    }
+
+}
+

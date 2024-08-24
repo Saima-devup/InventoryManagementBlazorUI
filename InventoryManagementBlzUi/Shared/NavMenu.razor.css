@@ -1,0 +1,115 @@
+.navbar-toggler {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.top-row {
+    height: 3.5rem;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.navbar-brand {
+    font-size: 1.1rem;
+}
+
+.oi {
+    width: 2rem;
+    font-size: 1.1rem;
+    vertical-align: text-top;
+    top: -2px;
+}
+.custom-nav-link {
+    border: 0px !important;
+    color: #000000 !important;
+    font-size: 15px !important;
+    background-color: #F8F9FA !important;
+}
+
+.nav-item {
+    font-size: 0.9rem;
+    padding-bottom: 0.5rem;
+    cursor: pointer;
+}
+
+    .nav-item:first-of-type {
+        padding-top: 1rem;
+    }
+
+    .nav-item:last-of-type {
+        padding-bottom: 1rem;
+    }
+
+    .nav-item ::deep a {
+        color: #d7d7d7;
+        border-radius: 4px;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        line-height: 2.5rem;
+    }
+
+        .nav-item ::deep a.active {
+            /*background-color: #d7d7d7 !important;*/
+            color: white;
+        }
+
+        .nav-item ::deep a:hover {
+            background-color: #d7d7d7 !important;
+            color: white;
+        }
+
+.nav-child-item-padding {
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+}
+
+@media (min-width: 641px) {
+    .navbar-toggler {
+        display: none;
+    }
+
+    .collapse {
+        /* Never collapse the sidebar for wide screens */
+        display: block;
+    }
+}
+
+.page a {
+    font-size: 15px;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+    text-transform: none;
+    color: #313131;
+}
+
+    .page a.active {
+    background-color: #d7bb6c;
+    border-radius: 0px;
+    }
+    .page a.active {
+    color: #fff;
+    background: -webkit-gradient(linear, left top, right top, from(#0071f3), to(#73b4ff));
+    background: linear-gradient(to right, #0071f3, #73b4ff);
+    }
+
+    .page a:hover:not(.active) {
+        /*background-color: #d4d5d2;*/
+        background-color: #d4d4d4;
+        border-color: #d4d4d4;
+        border-radius: 3px;
+        color: black;
+    }
+
+    .page a:focus {
+        background-color: #d2d2d2;
+        border-color: #d2d2d2;
+        color: black;
+        border-radius: 3px;
+        outline:none;
+
+    }
+
+    .page a.disable {
+        background-color: gainsboro !important;
+        border-radius: 3px !important;
+    }

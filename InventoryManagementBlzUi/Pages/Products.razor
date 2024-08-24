@@ -1,0 +1,493 @@
+@page "/Product"
+@using InventoryManagementBlzUi.APIClient
+@using InventoryManagementBlzUi.Models
+@using InventoryManagementBlzUi.Pagination;
+@inject Microsoft.AspNetCore.Components.NavigationManager navigationManager;
+@inject ProductAPIClient _ApiClient;
+
+<div class="container">
+
+    @*<h3><i class="fa fa-users"></i>Products</h3>
+        <hr />*@
+    <div class="row">
+        <div class="col-md-12 pb-3">
+        <a class="btn btn-primary-orange px-4 p-1" role="button" href='/Productdetails/0'><i class="oi oi-plus" style="margin-right:5px; font-size:13px;"></i>Create</a>
+	@*<a class="btn btn-primary-orange px-4 p-1" role="button" ><i class="fa fa-search-plus" style="margin-right:6px; font-size:16px;"></i>Search</a>*@
+            @if (!searchModeOn)
+            {
+                <a class="btn btn-primary-orange px-4 p-1" role="button" @onclick="(()=> SwitchSearchMode())"><i class="fa fa-search-minus" style="margin-right:5px; font-size:16px;"></i>Search</a>
+            }
+            else
+            {
+                <a class="btn btn-primary-orange px-4 p-1" role="button" @onclick="(()=> SwitchSearchMode())"><i class="fa fa-search-plus" style="margin-right:5px; font-size:16px;"></i>Search</a>  
+            }
+        </div>
+    </div>
+
+@if (!searchModeOn)
+    {
+    	<EditForm Model="@filter">
+        <div class="row">
+           					<div class="col-md-6 pb-2">
+						<label for="Name" class="control-label">Name</label>
+						<input for="SearchInput" class="form-control" @bind-value="filter.Name" />
+					</div>
+					<div class="col-md-6 pb-2">
+						<label for="Name" class="control-label">Category Id</label>
+						<input for="SearchInput" class="form-control" @bind-value="filter.CategoryId" type="number"/>
+					</div>
+					<div class="col-md-6 pb-2">
+						<label for="Name" class="control-label">Status</label>
+						<input for="SearchInput" class="form-control" @bind-value="filter.Status" type="number"/>
+					</div>
+
+                              
+            <div class="col-md-12 mt-2 mb-3">
+                <div class="form-group">
+                    <button class="btn btn-primary-orange btn-sm" @onclick="(()=> RefreshDataList(1))"><i class="oi oi-magnifying-glass" ></i>Search</button>
+                    <button class="btn btn-primary-grey btn-sm" @onclick="(()=> Reset())"><i class="oi oi-loop-circular"></i>Reset</button>
+                </div>
+            </div>
+                           
+        </div>
+    </EditForm>
+    }
+              
+    <div class="row pt-2">
+        <div class="col-md-12">
+            @if (dataList != null)
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="text-dark thead-light">
+                            <tr>
+                                								<th><span class="span" @onclick='(()=> SortPage("Id"))'>Id</span></th>
+								<th><span class="span" @onclick='(()=> SortPage("Name"))'>Name</span></th>
+								<th><span class="span" @onclick='(()=> SortPage("CategoryId"))'>Category Id</span></th>
+								<th><span class="span" @onclick='(()=> SortPage("NetPrice"))'>Net Price</span></th>
+								<th><span class="span" @onclick='(()=> SortPage("SalesPrice"))'>Sales Price</span></th>
+								<th><span class="span" @onclick='(()=> SortPage("StockQuantity"))'>Stock Quantity</span></th>
+								<th><span class="span" @onclick='(()=> SortPage("ProductionDate"))'>Production Date</span></th>
+								<th><span class="span" @onclick='(()=> SortPage("Status"))'>Status</span></th>
+                             
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody style="background-color:white;">
+                            @foreach (var data in dataList)
+                            {
+                                <tr class="">
+                                    									<td>@data.Id</td>
+									<td>@data.Name</td>
+									<td>@data.CategoryId</td>
+									<td>@data.NetPrice</td>
+									<td>@data.SalesPrice</td>
+									<td>@data.StockQuantity</td>
+									<td>@data.ProductionDate</td>
+									<td>@data.Status</td>
+
+                                    <td>
+                                        <div class="btn-group">
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-primary-orange dropdown-toggle btn-sm" data-toggle="dropdown"></button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item ti-mouse accent-blue" @onclick="(()=> UpdateItem(data.Id))"><i class="fa fa-pencil-square-o"></i>Edit</a>
+                                                    <a class="dropdown-item ti-mouse accent-blue" @onclick="(()=> DeleteItem(data.Id))"><i class="fa fa-trash-o"></i>Delete</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                   @* <td>
+                                         <div>
+                                            <a @onclick="(()=> UpdateItem(data.Id))"><i class="oi oi-pencil" title="Edit" style="font-size:15px; cursor:pointer;"></i></a>
+                                            <a  @onclick="(()=> DeleteItem(data.Id))"><i class="oi oi-trash" title="Delete" style="font-size:15px; cursor:pointer;"></i></a>
+                                         </div>
+                                        
+                                    </td>*@
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <div class="col-md-8">
+            <nav aria-label="navigation">
+                <ul class="pagination">
+                    @if (paginationModel != null && paginationModel.Pages.Count > 0)
+                    {
+                        foreach (Page item in paginationModel.Pages)
+                        {
+                            if (item.PageType == PaginationButtons.Previous)
+                            {
+                                if (item.Disabled)
+                                {
+                                    <li class="page-item disabled disable"><a class="page-link page-link-color"  @onclick="(()=> RefreshDataList(item.PageNumber, (int)item.PageType))"> &laquo; </a></li>
+                                }
+                                else if(item.Active)
+                                {
+                                    <li class="page-item"><a class="page-link page-link-color-active" @onclick="(()=> RefreshDataList(item.PageNumber, (int)item.PageType))"> &laquo; </a></li>
+                                }
+                                else
+                                {
+                                    <li class="page-item"><a class="page-link page-link-color" @onclick="(()=> RefreshDataList(item.PageNumber, (int)item.PageType))"> &laquo; </a></li>
+                                }
+                            }
+                            if (item.PageType == PaginationButtons.Simple)
+                            {
+                                if (item.Active)
+                                {
+                                    <li class="page-item"><a class="page-link page-link-color-active" @onclick="(()=> RefreshDataList(item.PageNumber, (int)item.PageType))">@item.PageNumber</a></li>
+                                }
+                                else
+                                {
+                                    <li class="page-item"><a class="page-link page-link-color" @onclick="(()=> RefreshDataList(item.PageNumber, (int)item.PageType))">@item.PageNumber</a></li>
+                                }
+                            }
+                            if (item.PageType == PaginationButtons.Next)
+                            {
+                                if (item.Disabled)
+                                {
+                                    <li class="page-item disabled disable"><a class="page-link page-link-color" @onclick="(()=> RefreshDataList(item.PageNumber, (int)item.PageType))"> &raquo; </a></li>
+                                }
+                                else if(item.Active)
+                                {
+                                    <li class="page-item"><a class="page-link page-link-color-active" @onclick="(()=> RefreshDataList(item.PageNumber, (int)item.PageType))"> &raquo; </a></li>
+                                }
+                                else
+                                {
+                                    <li class="page-item"><a class="page-link page-link-color" @onclick="(()=> RefreshDataList(item.PageNumber, (int)item.PageType))"> &raquo; </a></li>
+                                }
+                            }
+                        }
+                    }
+                    <li>
+                         
+                        <select class="form-control input-control-pagination" style="width:35px;" @onchange="SelectionChanged">
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                        </select>
+                        
+                    </li>
+                    <li>
+                        <p class="p-align">items per page</p>
+                    </li>
+                </ul>
+              
+            </nav>            
+        </div>
+
+        <div class="col-md-4 input-control-pagination">
+               <div style="float:right; margin-top:3px !important;">
+                     <span> @paginationModel.PageStartIndex - @paginationModel.PageEndIndex of @paginationModel.TotalItems items </span>
+               </div>
+         </div>
+    </div>
+</div>
+
+
+
+@code {
+    List<ProductModel> dataList { get; set; }
+    ProductFilterModel filter { get; set; }
+    private bool ascending = true;
+    private int totalPages, pagesCount;
+    PaginationModel paginationModel;
+    List<Page> pageList;
+    Page page;
+    ManageSorting_Product manageSorting;
+    private bool searchModeOn; 
+
+    protected override async Task OnInitializedAsync()
+    {
+        dataList = new List<ProductModel>();
+        filter = new ProductFilterModel();
+        paginationModel = new PaginationModel();
+        paginationModel.Pages = new List<Page>();
+        paginationModel.PageSize = 10;
+        filter.Ascending = true;
+        pagesCount = 0;
+        pageList = new List<Page>();
+        manageSorting = new ManageSorting_Product();
+	searchModeOn = true;
+
+        await RefreshDataList(1, (int)PaginationButtons.Simple);
+
+        await InvokeAsync(() => StateHasChanged());
+    }
+
+    private async Task RefreshDataList(int pageNumber, int senderButtonType = (int)PaginationButtons.Simple)
+    {       
+        try
+        {
+            await RefreshPagination(pageNumber);
+
+            //Get data
+            filter.PageNumber = paginationModel.CurrentPage;
+            filter.PageSize = paginationModel.PageSize;
+            dataList = await _ApiClient.GetByFilter(filter);            
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine(ex.ToString());
+        }
+    }
+
+    private async Task RefreshPagination(int pageNumber)
+    {
+        try
+        {
+            await AddPagination();
+
+            switch (pageNumber)
+            {
+                case -1:
+                    paginationModel.PreviousPage = paginationModel.CurrentPage;
+                    paginationModel.CurrentPage = paginationModel.CurrentPage - 1;
+                    break;
+                case -2:
+                    paginationModel.PreviousPage = paginationModel.CurrentPage;
+                    paginationModel.CurrentPage = paginationModel.CurrentPage + 1;
+                    break;
+                default:
+                    paginationModel.PreviousPage = paginationModel.CurrentPage;
+                    paginationModel.CurrentPage = pageNumber;
+                    break;
+            }
+
+            await SetPagesActiveStatus();
+
+            await SetPagesDisableStatus();
+
+            //Set page items start and end index.
+            int previousPageEndIndex = paginationModel.PageEndIndex;
+            int endIndex = paginationModel.CurrentPage * paginationModel.PageSize;
+            paginationModel.PageEndIndex =  endIndex > paginationModel.TotalItems ? paginationModel.TotalItems : endIndex ;
+            //paginationModel.PageStartIndex = (paginationModel.PageEndIndex - paginationModel.PageSize) + 1;
+            int lastPageSize = paginationModel.PageEndIndex - previousPageEndIndex;
+            paginationModel.PageStartIndex = (endIndex - paginationModel.PageSize) + 1;
+
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine(ex.ToString()); 
+        }
+    }
+
+    private async Task SetPagesActiveStatus()
+    {
+        try
+        {
+            // Set current and previous visited pages Active status.
+            if (paginationModel.PreviousPage > 0)
+            {
+                //Page previousActivePage = new Page();
+                var previousActivePage = new Page();
+                if(paginationModel.PreviousPage > pagesCount)
+                    previousActivePage = paginationModel.Pages.FirstOrDefault(x => x.PageNumber == -2);
+                else
+                    previousActivePage = paginationModel.Pages.First(x => x.PageNumber == paginationModel.PreviousPage);
+
+                if (previousActivePage != null)
+                {
+                    previousActivePage.Active = false;
+                    paginationModel.Pages[paginationModel.Pages.IndexOf(previousActivePage)] = previousActivePage;
+                }
+            }
+
+            var currentActivePage = new Page();
+            if(paginationModel.CurrentPage > pagesCount)
+                currentActivePage = paginationModel.Pages.FirstOrDefault(x => x.PageNumber == -2);
+            else
+                currentActivePage = paginationModel.Pages.FirstOrDefault(x => x.PageNumber == paginationModel.CurrentPage);
+
+            if (currentActivePage != null)
+            {
+                currentActivePage.Active = true;
+                paginationModel.Pages[paginationModel.Pages.IndexOf(currentActivePage)] = currentActivePage;
+            }
+
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine(ex.ToString());
+        }
+    }
+
+    private async Task SetPagesDisableStatus()
+    {
+        try
+        {
+            // Set 'Next' and 'Previous' pages Disabled status.
+            var previousPage = paginationModel.Pages.FirstOrDefault(x => x.PageNumber == -1);
+            if (previousPage != null)
+            {
+                if (paginationModel.CurrentPage == 1)
+                    previousPage.Disabled = true;
+                else
+                    previousPage.Disabled = false;
+                paginationModel.Pages[paginationModel.Pages.IndexOf(previousPage)] = previousPage;
+            }
+
+            var nextPage = paginationModel.Pages.FirstOrDefault(x => x.PageNumber == -2);
+            if (nextPage != null)
+            {
+                if (paginationModel.CurrentPage == totalPages)
+                    nextPage.Disabled = true;
+                else
+                    nextPage.Disabled = false;
+                paginationModel.Pages[paginationModel.Pages.IndexOf(nextPage)] = nextPage;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine(ex.ToString());
+        }
+    }
+
+    private async Task<bool> AddPagination()
+    {    
+        try
+        {
+            paginationModel.TotalItems = await _ApiClient.GetByFilterTotal(filter);
+            if (paginationModel.TotalItems < 1)
+                return false;
+            totalPages = (paginationModel.TotalItems % paginationModel.PageSize) > 0 ? 
+                                (paginationModel.TotalItems / paginationModel.PageSize) + 1 : paginationModel.TotalItems / paginationModel.PageSize; 
+            pagesCount = totalPages > 7 ? 7 : totalPages;
+
+            AddPages(pagesCount);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine(ex.ToString());
+            return false;
+        }
+    }
+
+    private async Task SortPage(string columnName)
+    {
+        try
+        {
+            //Get column's previous sorting status
+            bool sortingStatus = manageSorting.GetColumnStatus(columnName);
+            if(sortingStatus)
+            {
+                dataList = dataList.OrderByDescending(a => a.GetType().GetProperty(columnName).GetValue(a, null)).ToList();
+                manageSorting.UpdateColumnStatus(columnName, false);
+            }
+            else
+            {
+                dataList = dataList.OrderBy(a => a.GetType().GetProperty(columnName).GetValue(a, null)).ToList();
+                manageSorting.UpdateColumnStatus(columnName, true);
+            }
+
+            await InvokeAsync(() => StateHasChanged());
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine(ex.ToString());
+        }
+    }
+
+    private void AddPages(int pagesCount)
+    {
+        try
+        {
+            pageList.Clear();     
+            if (pagesCount > 3)
+            {
+                page = new Page();
+                page.PageType = PaginationButtons.Previous;
+                page.Active = false;
+                page.PageNumber = -1;
+                pageList.Add(page);
+            }
+
+            for (int i = 1; i <= pagesCount; i++)
+            {
+                page = new Page();
+                page.PageType = PaginationButtons.Simple;
+                page.Active = false;
+                page.PageNumber = i;
+
+                //if(i == 1)
+                //    page.Active = true;
+                //    paginationModel.CurrentPage = i;
+
+                pageList.Add(page);
+            }
+
+            if (pagesCount > 3)
+            {
+                page = new Page();
+                page.PageType = PaginationButtons.Next;
+                page.Active = false;
+                page.PageNumber = -2;
+                pageList.Add(page);
+            }
+
+            paginationModel.Pages = pageList; 
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine(ex.ToString());
+        }
+    }
+
+    protected async Task DeleteItem(long id)
+    {
+        try
+        {
+            bool response = await _ApiClient.Delete(id);
+
+            await RefreshDataList(filter.PageNumber??0);
+
+            await InvokeAsync(() => StateHasChanged());
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine(ex.ToString());
+        }
+    }
+
+    protected async Task UpdateItem(long id)
+    {
+        navigationManager.NavigateTo("/Productdetails/" + id, true);
+    }
+
+    protected async Task Reset()
+    {
+        try
+        {
+            filter = new ProductFilterModel();
+            await RefreshDataList(1, (int)PaginationButtons.Simple);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine(ex.ToString());
+        }
+    }
+
+    protected async Task SelectionChanged(ChangeEventArgs e)
+    {
+        string pageSize = e.Value.ToString() ?? "10";
+        paginationModel.PageSize = Int32.Parse(pageSize);
+
+        await RefreshDataList(1, (int)PaginationButtons.Simple);
+    }
+
+    protected void SwitchSearchMode() 
+    { 
+        searchModeOn = !searchModeOn; 
+    } 
+}
+
+
